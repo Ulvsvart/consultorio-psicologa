@@ -1,0 +1,1513 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf8f3">
+<title>Consultorio · Prototipo tableta</title>
+<script>
+  try{ var __t = localStorage.getItem("consultorio-psi-theme"); if(__t) document.documentElement.dataset.theme = __t; }catch(e){}
+</script>
+<style>
+  :root{
+    --paper:#fbf8f3;
+    --paper-2:#f4eee5;
+    --paper-3:#fffdf9;
+    --ink:#1e2a2b;
+    --ink-2:#4c5a5b;
+    --ink-3:#7d898a;
+    --rule:#e4dbcd;
+    --rule-2:#cfc3b2;
+    --accent:#a64b2a;
+    --accent-soft:#f6e6db;
+    --ok:#3d6b52;
+    --ok-soft:#e5ede6;
+    --warn:#8f641c;
+    --warn-soft:#f7ecd7;
+    --bad:#983a33;
+    --bad-soft:#f7e3e0;
+    --teal:#2f5d62;
+    --teal-soft:#e3ecec;
+    --bar-bg:rgba(251,248,243,.95);
+    --shadow:0 8px 24px rgba(30,42,43,.22);
+    --display:"Palatino Linotype",Palatino,"Book Antiqua","Noto Serif","Droid Serif",Georgia,serif;
+    --ui:"Segoe UI",Roboto,"Noto Sans",system-ui,-apple-system,sans-serif;
+    --tap:46px;
+    color-scheme:light;
+  }
+  [data-theme="dark"]{
+    --paper:#161a1b;
+    --paper-2:#1c2223;
+    --paper-3:#222a2b;
+    --ink:#ece6dd;
+    --ink-2:#bcb5a9;
+    --ink-3:#8b857b;
+    --rule:#2e3637;
+    --rule-2:#465051;
+    --accent:#d9805c;
+    --accent-soft:#3a2a22;
+    --ok:#8fbf9f;
+    --ok-soft:#20302a;
+    --warn:#d9ad63;
+    --warn-soft:#33291b;
+    --bad:#e08b81;
+    --bad-soft:#352120;
+    --teal:#7fb3b7;
+    --teal-soft:#1e3032;
+    --bar-bg:rgba(22,26,27,.95);
+    --shadow:0 8px 24px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font:15px/1.45 var(--ui);
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+  input,select,textarea{font:inherit;color:inherit}
+  svg.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  svg.i.sm{width:17px;height:17px}
+
+  /* ── barra superior ── */
+  .topbar{
+    position:sticky;top:0;z-index:20;background:var(--paper);
+    border-bottom:1px solid var(--rule);
+    padding:calc(10px + env(safe-area-inset-top)) 18px 10px;
+  }
+  .topbar-in{display:flex;align-items:center;gap:12px;max-width:820px;margin:0 auto}
+  .topbar .date{font-family:var(--display);font-size:19px;line-height:1.2}
+  .topbar .meta{font-size:12px;color:var(--ink-3);margin-top:1px}
+  .topbar .right{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .iconbtn{
+    width:40px;height:40px;border-radius:10px;display:grid;place-items:center;
+    color:var(--ink-2);border:1px solid var(--rule);background:var(--paper-3);
+  }
+  .iconbtn:active{background:var(--paper-2)}
+  .proto{
+    font-size:10.5px;letter-spacing:.03em;color:var(--warn);
+    background:var(--warn-soft);border:1px solid #e8d5b0;border-radius:999px;
+    padding:4px 9px;white-space:nowrap;
+  }
+
+  main{padding:18px 18px calc(96px + env(safe-area-inset-bottom));max-width:820px;margin:0 auto}
+
+  .view{display:none}
+  .view.on{display:block}
+
+  /* ── métricas ── */
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+  .metric{background:var(--paper-3);border:1px solid var(--rule);border-radius:12px;padding:11px 12px}
+  .metric .k{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);line-height:1.3}
+  .metric .v{font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.15}
+  .metric .v small{font-family:var(--ui);font-size:11px;color:var(--ink-3);letter-spacing:0}
+  .metric .v .cur{font-size:13px;color:var(--ink-3);margin-right:2px}
+  .metric .h{font-size:11px;color:var(--ink-3);line-height:1.35;margin-top:2px}
+  .metric .h em{font-style:normal;color:var(--bad)}
+
+  h2.sec{
+    font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+    font-weight:600;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+  h2.sec span{letter-spacing:0;text-transform:none;font-weight:400;font-size:12px}
+  h2.sec .btn{text-transform:none;letter-spacing:0;font-weight:400}
+
+  /* ── aviso plegable ── */
+  .alert{border:1px solid #ecdcbc;background:var(--warn-soft);border-radius:12px;margin-bottom:20px;overflow:hidden}
+  .alert summary{
+    list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;
+    font-size:13.5px;color:#6f4c13;cursor:pointer;min-height:48px;
+  }
+  .alert summary::-webkit-details-marker{display:none}
+  .alert summary b{font-weight:600}
+  .alert summary .car{margin-left:auto;transition:transform .2s}
+  .alert[open] summary .car{transform:rotate(90deg)}
+  .alert .body{padding:0 14px 8px}
+  .task{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid #eadcbf;font-size:13.5px}
+  .task input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--teal);flex:none}
+  .task label{color:#5d4517;line-height:1.4}
+  .task .when{display:block;font-size:11.5px;color:#8a6c33;margin-top:1px}
+  .task.done label{text-decoration:line-through;opacity:.6}
+
+  /* ── tarjeta de sesión ── */
+  .ses{
+    display:grid;grid-template-columns:58px minmax(0,1fr);gap:14px;
+    background:var(--paper-3);border:1px solid var(--rule);border-radius:12px;
+    padding:14px;margin-bottom:10px;
+  }
+  .ses .t{font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:600}
+  .ses .t small{display:block;font-size:11px;color:var(--ink-3);font-weight:400;margin-top:2px}
+  .ses .who{font-size:15.5px;font-weight:600;line-height:1.25}
+  .ses .meta{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .chip{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;padding:4px 9px;border-radius:999px;
+    border:1px solid transparent;white-space:nowrap;
+  }
+  .chip.ok{background:var(--ok-soft);color:var(--ok);border-color:#cfe0d3}
+  .chip.warn{background:var(--warn-soft);color:var(--warn);border-color:#ecdcbc}
+  .chip.bad{background:var(--bad-soft);color:var(--bad);border-color:#eed3cf}
+  .chip.neutral{background:var(--paper-2);color:var(--ink-3);border-color:var(--rule)}
+  .acts{display:flex;gap:8px;margin-top:12px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    min-height:var(--tap);padding:0 14px;border-radius:10px;
+    border:1px solid var(--rule-2);background:var(--paper);color:var(--ink-2);
+    font-size:13.5px;transition:background .12s,transform .06s;
+  }
+  .btn:active{transform:scale(.985);background:var(--paper-2)}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:500}
+  .btn.danger{color:var(--bad);border-color:#e3c2bd;background:var(--bad-soft)}
+  .btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2);padding:0 10px}
+  .btn.grow{flex:1}
+  .btn.sm{min-height:38px;font-size:12.5px;padding:0 12px;border-radius:9px}
+  .btn[disabled]{opacity:.45;pointer-events:none}
+
+  /* ── lista de pacientes ── */
+  .search{
+    display:flex;align-items:center;gap:10px;background:var(--paper-3);
+    border:1px solid var(--rule);border-radius:12px;padding:0 14px;min-height:var(--tap);margin-bottom:16px;
+    color:var(--ink-3);
+  }
+  .search input{border:0;background:none;outline:none;width:100%;min-height:44px}
+  .search input::placeholder{color:var(--ink-3)}
+  .search:focus-within{border-color:var(--rule-2)}
+
+  .plist{background:var(--paper-3);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+  .prow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--rule);width:100%;text-align:left;min-height:66px}
+  .prow:last-child{border-bottom:0}
+  .prow:active{background:var(--paper-2)}
+  .ava{
+    width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+    background:var(--paper-2);border:1px solid var(--rule);font-family:var(--display);
+    font-size:16px;color:var(--ink-2);letter-spacing:.02em;
+  }
+  .pname{font-size:15px;font-weight:600;line-height:1.25}
+  .pmeta{font-size:12px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pbal{font-size:12.5px;font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-3);white-space:nowrap}
+  .pbal.owed{color:var(--bad);font-weight:600}
+  .pbal small{display:block;font-size:10.5px;color:var(--ink-3);font-weight:400}
+  .empty{padding:26px 16px;color:var(--ink-3);font-size:13.5px;text-align:center}
+
+  /* ── agenda día ── */
+  .weekstrip{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:18px}
+  .day{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:9px 0 8px;border-radius:11px;border:1px solid var(--rule);
+    background:var(--paper-3);min-height:62px;
+  }
+  .day .dw{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+  .day .dn{font-family:var(--display);font-size:18px;line-height:1;font-variant-numeric:tabular-nums}
+  .day .dt{width:5px;height:5px;border-radius:50%;background:var(--teal);margin-top:3px}
+  .day.on{background:var(--ink);border-color:var(--ink)}
+  .day.on .dw{color:var(--paper-2)}
+  .day.on .dn{color:var(--paper)}
+  .day.on .dt{background:#e0a882}
+
+  .trow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:stretch}
+  .trow .hh{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding-top:16px;text-align:right;border-right:1px solid var(--rule);padding-right:12px}
+  .trow .slot{padding:0 0 12px 0}
+  .blk{
+    background:var(--teal-soft);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;
+    padding:11px 13px;min-height:64px;
+  }
+  .blk b{display:block;font-size:15px;font-weight:600;line-height:1.25}
+  .blk span{font-size:12px;color:var(--ink-2)}
+  .blk.warn{background:var(--warn-soft);border-left-color:var(--warn)}
+  .blk.admin{background:repeating-linear-gradient(135deg,#f1ebe1 0 7px,#f7f2e9 7px 14px);border-left-color:var(--rule-2)}
+  .blk.admin b{font-weight:500;color:var(--ink-2);font-size:14px}
+  .free{
+    border:1px dashed var(--rule);border-radius:0 10px 10px 0;min-height:48px;width:100%;
+    display:flex;align-items:center;padding:0 13px;font-size:12.5px;color:var(--ink-3);background:none;
+  }
+  .free:active{background:var(--paper-2)}
+  .legend{display:flex;gap:16px;margin-top:16px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .sw-conf{background:var(--teal-soft);border-left:3px solid var(--teal)}
+  .sw-warn{background:var(--warn-soft);border-left:3px solid var(--warn)}
+  .sw-off{background:#e7ddcb;border-left:3px solid #b8a58a}
+
+  /* ── pagos ── */
+  .chart{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:end;height:132px;margin-top:4px}
+  .barwrap{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px}
+  .val{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .bar{width:100%;max-width:34px;background:#ece3d5;border:1px solid #dccfbb;border-bottom:0;border-radius:4px 4px 0 0}
+  .bar.now{background:var(--teal-soft);border-color:var(--teal)}
+  .chart-x{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;border-top:1px solid var(--rule-2);padding-top:6px;font-size:11px;color:var(--ink-3);text-align:center}
+  .panel{background:var(--paper-3);border:1px solid var(--rule);border-radius:12px;padding:16px;margin-bottom:18px}
+  .panel h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;font-weight:600}
+  .panel .hint{font-size:11.5px;color:var(--ink-3);line-height:1.5;margin-top:10px}
+  .pay{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--rule)}
+  .pay:last-child{border-bottom:0;padding-bottom:0}
+  .pay .n{font-size:14px;font-weight:600}
+  .pay .m{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .pay .amt{font-variant-numeric:tabular-nums;font-size:15px;text-align:right}
+  .pay .rc{font-size:10.5px;color:var(--ink-3);text-align:right}
+
+  /* ── hoja ── */
+  .scrim{position:fixed;inset:0;background:rgba(30,42,43,.32);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;max-height:93vh;z-index:41;
+    background:var(--paper);border-radius:18px 18px 0 0;
+    transform:translateY(101%);transition:transform .26s cubic-bezier(.2,.85,.2,1);
+    display:flex;flex-direction:column;
+  }
+  .sheet.on{transform:none}
+  .sheet-head{padding:14px 18px 12px;border-bottom:1px solid var(--rule);position:relative;flex:none}
+  .grab{width:38px;height:4px;border-radius:2px;background:var(--rule-2);margin:0 auto 12px}
+  .sheet-head h2{font-family:var(--display);font-size:22px;font-weight:400;margin:0;padding-right:44px}
+  .sheet-head .sub{font-size:12.5px;color:var(--ink-3);margin-top:1px}
+  .sheet-close{position:absolute;right:12px;top:16px;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:var(--ink-3)}
+  .sheet-close:active{background:var(--paper-2)}
+  .sheet-body{overflow-y:auto;padding:18px;padding-bottom:26px;flex:1}
+  .sheet-foot{
+    flex:none;display:flex;gap:10px;padding:12px 18px calc(12px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--rule);background:var(--paper);
+  }
+
+  .dl{display:grid;grid-template-columns:112px minmax(0,1fr);gap:11px 14px;font-size:14px;margin:0}
+  .dl dt{color:var(--ink-3);font-size:12.5px;padding-top:1px}
+  .dl dd{margin:0;color:var(--ink-2)}
+  .mini-note{border-left:2px solid var(--rule-2);padding:1px 0 1px 12px;margin-bottom:14px}
+  .mini-note .d{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .mini-note p{margin:3px 0 0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+
+  /* ── formulario ── */
+  .fgroup{margin-bottom:16px}
+  .fgroup > .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{display:flex;flex-direction:column;margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field label{font-size:12px;color:var(--ink-3);margin-bottom:6px}
+  .field label b{color:var(--accent);font-weight:400}
+  .field input,.field select,.field textarea{
+    width:100%;min-height:var(--tap);border:1px solid var(--rule);border-radius:10px;
+    background:var(--paper-3);padding:0 12px;outline:none;color:var(--ink);
+  }
+  .field textarea{min-height:88px;padding:11px 12px;resize:vertical;line-height:1.5}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,93,98,.12)}
+  .field .errmsg{display:none;font-size:11.5px;color:var(--bad);margin-top:5px}
+  .field.err input,.field.err select{border-color:var(--bad);background:#fdf6f5}
+  .field.err .errmsg{display:block}
+  .field .hint{font-size:11px;color:var(--ink-3);margin-top:5px}
+
+  .seg{display:flex;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--paper-3)}
+  .seg button{flex:1;min-height:var(--tap);font-size:12.5px;color:var(--ink-2);border-right:1px solid var(--rule);padding:0 4px}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--ink);color:var(--paper);font-weight:500}
+
+  .check{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--paper-3)}
+  .check input{width:22px;height:22px;accent-color:var(--teal);flex:none}
+  .check span{font-size:13.5px;color:var(--ink-2);line-height:1.35}
+
+  /* ── ajustes ── */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule)}
+  .row:last-child{border-bottom:0}
+  .row .rt{font-size:13.5px;color:var(--ink)}
+  .row .rs{font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.4}
+  .row .rt b{font-weight:600}
+
+  /* ── barra inferior ── */
+  .tabbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:var(--bar-bg);backdrop-filter:blur(10px);
+    border-top:1px solid var(--rule);
+    display:grid;grid-template-columns:repeat(5,1fr);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tabbar button{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    min-height:56px;border-radius:10px;color:var(--ink-3);font-size:10.5px;letter-spacing:.02em;
+    position:relative;
+  }
+  .tabbar button.on{color:var(--accent)}
+  .tabbar button.on::before{content:"";position:absolute;top:0;width:24px;height:2px;border-radius:2px;background:var(--accent)}
+  .tabbar .badge{
+    position:absolute;top:5px;right:calc(50% - 22px);min-width:16px;height:16px;border-radius:8px;
+    background:var(--accent);color:#fff;font-size:9.5px;display:grid;place-items:center;padding:0 4px;
+  }
+
+  .toast{
+    position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translate(-50%,12px);
+    background:var(--ink);color:var(--paper);font-size:13px;padding:11px 16px;border-radius:10px;
+    opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:60;
+    max-width:min(88vw,460px);text-align:center;line-height:1.4;box-shadow:var(--shadow);
+  }
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ── aviso de bienvenida ── */
+  .welcome{
+    border:1px solid var(--rule);background:var(--paper-3);border-radius:12px;
+    padding:16px;margin-bottom:20px;border-left:3px solid var(--accent);
+  }
+  .welcome h3{font-family:var(--display);font-size:17px;font-weight:400;margin:0 0 6px}
+  .welcome p{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+  .welcome ul{margin:0 0 12px;padding-left:18px;font-size:13px;color:var(--ink-2);line-height:1.55}
+  .welcome li{margin-bottom:3px}
+
+  /* ── ayuda ── */
+  .help-sec{margin-bottom:20px}
+  .help-sec h3{font-family:var(--display);font-size:16px;font-weight:400;margin:0 0 6px}
+  .help-sec p{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+  .help-sec ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2);line-height:1.6}
+  .help-sec li{margin-bottom:6px}
+  .help-sec b{color:var(--ink)}
+  .help-note{background:var(--paper-2);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--ink-2);line-height:1.55}
+
+  .file-hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+  /* ── modo oscuro: ajustes de color ── */
+  [data-theme="dark"] .chip.ok{border-color:#34513f}
+  [data-theme="dark"] .chip.warn{border-color:#4d3d22}
+  [data-theme="dark"] .chip.bad{border-color:#51332f}
+  [data-theme="dark"] .chip.neutral{border-color:var(--rule)}
+  [data-theme="dark"] .alert{border-color:#4a3c26}
+  [data-theme="dark"] .alert summary{color:#efc98d}
+  [data-theme="dark"] .task{border-top-color:#3a3020}
+  [data-theme="dark"] .task label{color:#cfb184}
+  [data-theme="dark"] .task .when{color:#a58e63}
+  [data-theme="dark"] .btn.danger{border-color:#4f3230}
+  [data-theme="dark"] .field.err input,[data-theme="dark"] .field.err select{background:#2b1f1e}
+  [data-theme="dark"] .chart .bar{background:#2b3334;border-color:#3d4749}
+  [data-theme="dark"] .chart .bar.now{background:var(--teal-soft);border-color:var(--teal)}
+  [data-theme="dark"] .day.on .dt{background:#e0a882}
+  [data-theme="dark"] .proto{border-color:#4d3d22}
+  [data-theme="dark"] .blk.admin{background:repeating-linear-gradient(135deg,#232b2c 0 7px,#272f30 7px 14px)}
+  [data-theme="dark"] .scrim{background:rgba(0,0,0,.55)}
+  [data-theme="dark"] .sheet.on{box-shadow:-18px 0 40px rgba(0,0,0,.45)}
+  [data-theme="dark"] .sw-off{background:#3a332a;border-left-color:#6a5c48}
+
+  @media (min-width:1000px){
+    main{max-width:1100px;padding-left:28px;padding-right:28px}
+    .topbar{padding-left:28px;padding-right:28px}
+    .topbar-in{max-width:1100px}
+    .hoy-cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:26px;align-items:start}
+    .metrics{grid-template-columns:repeat(3,1fr)}
+    .sheet{left:auto;right:0;top:0;bottom:0;width:520px;max-height:100vh;border-radius:0;border-left:1px solid var(--rule-2);transform:translateX(102%)}
+    .sheet.on{transform:none}
+    .grab{display:none}
+    .sheet-head{padding-top:22px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5"/><path d="M17 5.5a3 3 0 0 1 0 5.8M18.4 14.8c2 .6 3.1 2.1 3.1 4.2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 9h18M16.5 13.5h1.5"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 12h3M13 12h7M4 17h9M19 17h1"/><circle cx="15.5" cy="7" r="2.1"/><circle cx="9.5" cy="12" r="2.1"/><circle cx="15.5" cy="17" r="2.1"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 12a7.5 7.5 0 0 1-7.5 7.5c-1.2 0-2.4-.3-3.4-.8L4 20l1.3-4.1A7.5 7.5 0 1 1 20 12z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v11m0 0l4-4m-4 4l-4-4"/><path d="M4 17v2.5h16V17"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-sun2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.4"/><path d="M12 17.2v.1"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 20V9m0 0l-4 4m4-4l4 4"/><path d="M4 6V3.5h16V6"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div>
+      <div class="date" id="ttl">Hoy</div>
+      <div class="meta" id="sub">Lunes 23 de noviembre · 5 sesiones</div>
+    </div>
+    <div class="right">
+      <span class="proto">Prototipo</span>
+      <button class="iconbtn" id="btnTema" aria-label="Cambiar a modo oscuro" title="Modo oscuro"><svg class="i"><use href="#i-moon"/></svg></button>
+      <button class="iconbtn" id="btnAyuda" aria-label="Ayuda de esta pantalla" title="Qué hace todo esto"><svg class="i"><use href="#i-help"/></svg></button>
+      <button class="iconbtn" id="btnBackup" aria-label="Exportar respaldo" title="Exportar respaldo"><svg class="i"><use href="#i-save"/></svg></button>
+      <button class="iconbtn" aria-label="Bloquear" title="Bloquear"><svg class="i"><use href="#i-lock"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ══════════ HOY ══════════ -->
+  <section class="view on" id="v-hoy">
+    <div class="welcome" id="welcome">
+      <h3>Esto todavía no es la app</h3>
+      <p>Es un ensayo para que veas cómo se vería, con pacientes inventados. Nada de lo que hay aquí es real y no se manda a ningún lado: todo queda en esta tableta.</p>
+      <ul>
+        <li>Abajo están las cinco pantallas. Toca cada una para ver qué hace.</li>
+        <li>El botón <b>?</b> de arriba explica la pantalla en la que estás.</li>
+        <li>Prueba crear un paciente y cobrar una sesión. No se puede romper nada.</li>
+      </ul>
+      <button class="btn" id="welcomeOk">Entendido, a probar</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="k">Sesiones hoy</div><div class="v">5</div><div class="h">de 6 bloques</div></div>
+      <div class="metric"><div class="k">Confirmadas</div><div class="v">3 <small>/ 5</small></div><div class="h"><em>2</em> sin confirmar</div></div>
+      <div class="metric"><div class="k">Por cobrar</div><div class="v"><span class="cur">Bs</span> 750</div><div class="h" id="hoyDeuda">3 sesiones de hoy sin cobrar</div></div>
+    </div>
+
+    <div class="hoy-cols">
+      <div>
+        <details class="alert">
+          <summary>
+            <svg class="i sm"><use href="#i-doc"/></svg>
+            <span><b>3 pendientes</b> para hoy</span>
+            <svg class="i sm car"><use href="#i-right"/></svg>
+          </summary>
+          <div class="body">
+            <div class="task"><input type="checkbox" id="t1"><label for="t1">Pedir autorización de la madre de Rocío<span class="when">Antes de las 17:00</span></label></div>
+            <div class="task"><input type="checkbox" id="t2"><label for="t2">Reagendar a Gabriel, avisó que viaja<span class="when">Tenía hora el jueves</span></label></div>
+            <div class="task"><input type="checkbox" id="t3" checked><label for="t3" class="done">Imprimir consentimiento de Nayra<span class="when">Primera entrevista</span></label></div>
+          </div>
+        </details>
+
+        <h2 class="sec">Agenda del día <span id="hoyCount">5 sesiones</span></h2>
+        <div id="hoyList"></div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3>Nota rápida</h3>
+          <textarea id="quickNote" placeholder="Anotar algo antes de que se me olvide…"
+            style="width:100%;min-height:82px;resize:vertical;border:1px solid var(--rule);border-radius:10px;background:var(--paper);padding:11px;font-size:14px;line-height:1.5;color:var(--ink);outline:none"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px">
+            <span style="font-size:11.5px;color:var(--ink-3)">Se guarda en la tableta</span>
+            <button class="btn" id="saveNote">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ PACIENTES ══════════ -->
+  <section class="view" id="v-pacientes">
+    <div class="search">
+      <svg class="i sm"><use href="#i-search"/></svg>
+      <input id="q" placeholder="Buscar por nombre o motivo" aria-label="Buscar paciente">
+    </div>
+    <h2 class="sec">
+      <span id="pTitle">Pacientes activos</span>
+      <button class="btn sm primary" id="btnNuevo"><svg class="i sm"><use href="#i-plus"/></svg>Nuevo paciente</button>
+    </h2>
+    <div class="plist" id="plist"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:11.5px;color:var(--ink-3)">
+      <span id="pcount">12 registros</span>
+      <button class="btn ghost sm" id="btnArchivados">Ver archivados</button>
+    </div>
+  </section>
+
+  <!-- ══════════ AGENDA ══════════ -->
+  <section class="view" id="v-agenda">
+    <div class="weekstrip" id="weekstrip"></div>
+    <h2 class="sec">Lunes 23 <span>5 sesiones · 1 bloqueo</span></h2>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+      <span><i class="sw sw-conf"></i>Confirmada</span>
+      <span><i class="sw sw-warn"></i>Sin confirmar</span>
+      <span><i class="sw sw-off"></i>Bloqueo</span>
+    </div>
+  </section>
+
+  <!-- ══════════ PAGOS ══════════ -->
+  <section class="view" id="v-pagos">
+    <div class="metrics" style="grid-template-columns:repeat(2,1fr)">
+      <div class="metric"><div class="k">Cobrado en noviembre</div><div class="v" id="mCobrado"><span class="cur">Bs</span> 6.840</div><div class="h" id="mCobradoH">46 sesiones</div></div>
+      <div class="metric"><div class="k">Por cobrar</div><div class="v" style="color:var(--bad)" id="mDeuda"><span class="cur" style="color:var(--ink-3)">Bs</span> 750</div><div class="h" id="mDeudaH">2 pacientes</div></div>
+      <div class="metric"><div class="k">Ticket promedio</div><div class="v"><span class="cur">Bs</span> 149</div><div class="h">Individual, pareja, primera</div></div>
+      <div class="metric"><div class="k">Gastos del mes</div><div class="v"><span class="cur">Bs</span> 1.480</div><div class="h">Alquiler, servicios, supervisión</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Últimos seis meses</h3>
+      <div class="chart">
+        <div class="barwrap"><span class="val">4,1</span><div class="bar" style="height:62%"></div></div>
+        <div class="barwrap"><span class="val">4,3</span><div class="bar" style="height:66%"></div></div>
+        <div class="barwrap"><span class="val">3,9</span><div class="bar" style="height:59%"></div></div>
+        <div class="barwrap"><span class="val">4,6</span><div class="bar" style="height:71%"></div></div>
+        <div class="barwrap"><span class="val">5,2</span><div class="bar" style="height:80%"></div></div>
+        <div class="barwrap"><span class="val">6,8</span><div class="bar now" style="height:100%"></div></div>
+      </div>
+      <div class="chart-x"><span>Jun</span><span>Jul</span><span>Ago</span><span>Sep</span><span>Oct</span><span>Nov</span></div>
+      <div class="hint">En miles de bolivianos. Noviembre incluye dos pacientes nuevos.</div>
+    </div>
+
+    <h2 class="sec">Últimos pagos <span id="payCount"></span></h2>
+    <div class="panel" id="payList" style="padding-top:6px;padding-bottom:14px"></div>
+    <div style="font-size:11.5px;color:var(--ink-3);line-height:1.5">
+      El recibo sale en PDF con sus datos. La factura del SIN no la genera esta app: eso lo ve su contador.
+    </div>
+  </section>
+
+  <!-- ══════════ AJUSTES ══════════ -->
+  <section class="view" id="v-ajustes">
+    <div class="panel">
+      <h3>El consultorio</h3>
+      <div class="field"><label>Nombre</label><input id="cNombre" value="Daniela Ferrufino"></div>
+      <div class="field"><label>Especialidad</label><input id="cEsp" value="Psicóloga clínica"></div>
+      <div class="field" style="margin-bottom:0"><label>Ciudad</label><input id="cCiudad" value="Santa Cruz de la Sierra"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Tarifas</h3>
+      <div class="grid2">
+        <div class="field" style="margin:0"><label>Individual (Bs)</label><input id="tInd" type="number" inputmode="numeric" value="150"></div>
+        <div class="field" style="margin:0"><label>Pareja (Bs)</label><input id="tPar" type="number" inputmode="numeric" value="250"></div>
+      </div>
+      <div class="field" style="margin-top:12px;margin-bottom:0"><label>Primera entrevista (Bs)</label><input id="tPri" type="number" inputmode="numeric" value="200"></div>
+      <div class="hint">Cambiar una tarifa no toca lo ya cobrado.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Respaldo</h3>
+      <p class="hint" style="margin:0 0 6px">
+        Si se borra la app o se limpia el navegador, el respaldo es lo que devuelve todo. Son dos botones: uno saca la copia, el otro la mete de vuelta.
+      </p>
+      <div class="row">
+        <div><div class="rt"><b>Exportar mis datos</b></div><div class="rs">Descarga un archivo con pacientes, notas y pagos. Guárdalo en Drive o mándatelo por WhatsApp.</div></div>
+        <button class="btn sm primary" id="btnExport">Exportar</button>
+      </div>
+      <div class="row">
+        <div><div class="rt"><b>Importar un respaldo</b></div><div class="rs">Lee un archivo exportado antes y devuelve todo. Reemplaza lo que haya ahora.</div></div>
+        <button class="btn sm" id="btnImport">Elegir archivo</button>
+      </div>
+      <div class="row">
+        <div><div class="rt">Último respaldo</div><div class="rs" id="lastBackup">Todavía no hiciste ninguno.</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Seguridad y datos</h3>
+      <div class="row">
+        <div><div class="rt">PIN de entrada</div><div class="rs">Además del bloqueo de la tableta.</div></div>
+        <button class="btn sm" id="btnPin">Activar</button>
+      </div>
+      <div class="row">
+        <div><div class="rt">Restaurar ejemplo</div><div class="rs">Vuelve a los 12 pacientes inventados.</div></div>
+        <button class="btn sm" id="btnReset">Restaurar</button>
+      </div>
+      <div class="row">
+        <div><div class="rt">Borrar todo</div><div class="rs">Deja la app vacía. No se puede deshacer.</div></div>
+        <button class="btn sm danger" id="btnWipe">Borrar</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Cómo funciona</h3>
+      <div class="row">
+        <div><div class="rt">Guía de la app</div><div class="rs">Qué hace cada pantalla y cada botón, en palabras simples.</div></div>
+        <button class="btn sm" id="btnGuia">Ver guía</button>
+      </div>
+    </div>
+
+    <div style="font-size:11.5px;color:var(--ink-3);line-height:1.6">
+      Esta maqueta guarda lo que escribas en este navegador, para que se sienta real. No uses datos de pacientes de verdad.
+    </div>
+
+    <input type="file" id="fileImport" accept=".json,application/json" class="file-hidden">
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button data-view="hoy" class="on"><svg class="i"><use href="#i-sun"/></svg>Hoy</button>
+  <button data-view="pacientes"><svg class="i"><use href="#i-users"/></svg>Pacientes</button>
+  <button data-view="agenda"><svg class="i"><use href="#i-cal"/></svg>Agenda<span class="badge">2</span></button>
+  <button data-view="pagos"><svg class="i"><use href="#i-wallet"/></svg>Pagos</button>
+  <button data-view="ajustes"><svg class="i"><use href="#i-gear"/></svg>Ajustes</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="grab"></div>
+    <h2 id="dName">—</h2>
+    <div class="sub" id="dSub">—</div>
+    <button class="sheet-close" id="dClose" aria-label="Cerrar"><svg class="i"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="sheet-body" id="dBody"></div>
+  <div class="sheet-foot" id="dFoot"></div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════ datos ═══════════ */
+const SEED = [
+  {id:1,n:"María Quispe",e:34,oc:"Administradora de empresa",m:"Ansiedad generalizada",mod:"Individual",s:12,u:"23/11",saldo:0,tel:"712 34 561",desde:"Marzo 2026",emerg:"Esposo · 780 11 209",cons:true,
+   notas:[["20/11","Durmió mejor esta semana. Bajó la frecuencia de las crisis a dos. Sigue evitando las reuniones de gerencia.","Trabajar exposición gradual."],["13/11","Primera sesión en la que habla del despido de su padre sin quebrarse."]]},
+  {id:2,n:"Jhonny Mamani",e:41,oc:"Comerciante",m:"Terapia de pareja",mod:"Pareja",s:4,u:"23/11",saldo:250,tel:"765 90 118",desde:"Octubre 2026",emerg:"Carla Mamani · 765 90 120",cons:true,
+   notas:[["20/11","Vienen juntos por segunda vez. Carla plantea el tema de la plata del negocio. Jhonny se cierra."]]},
+  {id:3,n:"Nayra Condori",e:27,oc:"Estudiante de derecho",m:"Primera entrevista",mod:"Individual",s:1,u:"23/11",saldo:200,tel:"690 44 872",desde:"Noviembre 2026",emerg:"Madre · 690 44 870",cons:false,
+   notas:[["—","Llega por derivación de la universidad. Falta firmar el consentimiento antes de empezar."]]},
+  {id:4,n:"Andrés Villarroel",e:52,oc:"Ingeniero civil",m:"Duelo",mod:"Individual",s:7,u:"23/11",saldo:0,tel:"721 88 045",desde:"Septiembre 2026",emerg:"Hermana · 721 88 046",cons:true,
+   notas:[["20/11","Volvió a la obra después de dos meses. Habla de su mamá en presente y se da cuenta."]]},
+  {id:5,n:"Rocío Choque",e:16,oc:"Estudiante de colegio",m:"Ansiedad escolar",mod:"Adolescente",s:3,u:"23/11",saldo:150,tel:"778 20 336",desde:"Octubre 2026",emerg:"Madre · 778 20 337",cons:false,
+   notas:[["16/11","La madre pide que no se entere el colegio. Aclarar límites de confidencialidad con la adolescente."]]},
+  {id:6,n:"Gabriel Terceros",e:29,oc:"Vendedor",m:"Insomnio y estrés laboral",mod:"Individual",s:9,u:"20/11",saldo:150,tel:"703 12 594",desde:"Julio 2026",emerg:"Primo · 703 12 590",cons:true,
+   notas:[["20/11","Viaja a Cochabamba por trabajo. Pidió mover la sesión del jueves."]]},
+  {id:7,n:"Silvia Arancibia",e:45,oc:"Docente",m:"Depresión leve",mod:"Individual",s:15,u:"19/11",saldo:0,tel:"719 55 301",desde:"Abril 2026",emerg:"Hija · 719 55 303",cons:true,
+   notas:[["19/11","Retomó el taller de cerámica. Buen indicador.","Revisar si seguimos semanal o pasamos a quincenal."]]},
+  {id:8,n:"Camila Vaca Díez",e:38,oc:"Contadora",m:"Separación",mod:"Individual",s:6,u:"18/11",saldo:0,tel:"736 07 827",desde:"Agosto 2026",emerg:"Hermano · 736 07 828",cons:true,
+   notas:[["18/11","Firmó el acuerdo de separación. Alivio y culpa a la vez."]]},
+  {id:9,n:"Sofía Loayza",e:22,oc:"Estudiante de medicina",m:"Primera entrevista",mod:"Individual",s:1,u:"24/11",saldo:0,tel:"692 71 440",desde:"Noviembre 2026",emerg:"Padre · 692 71 441",cons:true,
+   notas:[["—","Primera cita agendada para el martes 24 a las 15:00."]]},
+  {id:10,n:"Lucía Paredes",e:31,oc:"Enfermera",m:"Ansiedad",mod:"Individual",s:8,u:"25/11",saldo:0,tel:"714 60 219",desde:"Agosto 2026",emerg:"Madre · 714 60 220",cons:true,
+   notas:[["12/11","Turnos rotativos. Trabajamos horario de sueño."]]},
+  {id:11,n:"Marcelo Aguirre",e:47,oc:"Abogado",m:"Estrés y presión laboral",mod:"Individual",s:5,u:"26/11",saldo:0,tel:"722 03 918",desde:"Septiembre 2026",emerg:"Esposa · 722 03 919",cons:true,
+   notas:[["05/11","Reduce la carga de casos. Pide técnicas concretas, no quiere hablar de la infancia."]]},
+  {id:12,n:"Elena Céspedes",e:58,oc:"Jubilada",m:"Duelo",mod:"Individual",s:10,u:"26/11",saldo:0,tel:"707 39 654",desde:"Mayo 2026",emerg:"Hijo · 707 39 655",cons:true,
+   notas:[["12/11","Ya no duerme en la sala. Primera noche en su cuarto desde marzo."]]}
+];
+
+const SEED_PAGOS = [
+  {f:"23/11",n:"María Quispe",met:"Efectivo",monto:150,rc:"R-0188"},
+  {f:"23/11",n:"Andrés Villarroel",met:"QR Simple",monto:150,rc:"R-0187"},
+  {f:"20/11",n:"Gabriel Terceros",met:"Transferencia",monto:150,rc:"R-0186"},
+  {f:"19/11",n:"Silvia Arancibia",met:"Efectivo",monto:150,rc:"R-0185"},
+  {f:"18/11",n:"Jhonny y Carla Mamani",met:"QR Simple",monto:250,rc:"R-0184"}
+];
+
+const hoy = [
+  {h:"09:00", d:"60 min", n:"María Quispe", meta:"Sesión 12 · Ansiedad generalizada", estado:"ok", cobrado:true, nota:true, monto:150, pid:1},
+  {h:"10:30", d:"60 min", n:"Jhonny Mamani", meta:"Sesión 4 · Terapia de pareja", estado:"ok", cobrado:false, nota:true, monto:250, pid:2},
+  {h:"14:00", d:"60 min", n:"Nayra Condori", meta:"Primera entrevista · consentimiento sin firmar", estado:"warn", cobrado:false, nota:false, monto:200, pid:3},
+  {h:"15:30", d:"60 min", n:"Andrés Villarroel", meta:"Sesión 7 · Duelo", estado:"ok", cobrado:true, nota:false, monto:150, pid:4},
+  {h:"17:00", d:"60 min", n:"Rocío Choque", meta:"Sesión 3 · viene con la madre", estado:"warn", cobrado:false, nota:false, monto:150, pid:5}
+];
+
+const dia = [
+  {h:"09:00", dur:60, n:"María Quispe", t:"Sesión 12 · ansiedad", s:"ok"},
+  {h:"10:30", dur:60, n:"Jhonny Mamani", t:"Sesión 4 · pareja", s:"warn"},
+  {h:"12:00", dur:60, n:"Almuerzo", t:"Bloqueo personal", s:"admin"},
+  {h:"14:00", dur:60, n:"Nayra Condori", t:"Primera entrevista", s:"warn"},
+  {h:"15:30", dur:60, n:"Andrés Villarroel", t:"Sesión 7 · duelo", s:"ok"},
+  {h:"17:00", dur:60, n:"Rocío Choque", t:"Sesión 3 · ansiedad escolar", s:"warn"}
+];
+
+/* ═══════════ estado ═══════════ */
+const KEY = "consultorio-psi-prototype-v1";
+const cfgDefault = {nombre:"Daniela Ferrufino",esp:"Psicóloga clínica",ciudad:"Santa Cruz de la Sierra",
+  tarifas:{Individual:150,Pareja:250,Adolescente:120,Familia:280,Primera:200}};
+let estado = {pacientes:null, pagos:null, archivados:null, cfg:null, borrado:false};
+
+function cargar(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    const g = JSON.parse(raw);
+    estado.pacientes = g.pacientes || null;
+    estado.pagos = g.pagos || null;
+    estado.archivados = g.archivados || [];
+    estado.cfg = Object.assign({}, cfgDefault, g.cfg || {});
+    estado.cfg.tarifas = Object.assign({}, cfgDefault.tarifas, (g.cfg||{}).tarifas||{});
+    estado.borrado = !!g.borrado;
+  }catch(e){}
+}
+function guardar(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify({
+      pacientes:estado.pacientes, pagos:estado.pagos,
+      archivados:estado.archivados, cfg:estado.cfg, borrado:estado.borrado
+    }));
+  }catch(e){}
+}
+function seed(){
+  estado.pacientes = JSON.parse(JSON.stringify(SEED));
+  estado.pagos = JSON.parse(JSON.stringify(SEED_PAGOS));
+  estado.archivados = [];
+  estado.cfg = JSON.parse(JSON.stringify(cfgDefault));
+  estado.borrado = false;
+}
+cargar();
+if(!estado.pacientes){ seed(); }
+const P = () => estado.pacientes;
+const pagos = () => estado.pagos;
+const cfg = () => estado.cfg;
+
+/* ═══════════ utilidades ═══════════ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const iniciales = n => n.split(" ").filter(w => w.length > 2).slice(0,2).map(w => w[0]).join("").toUpperCase();
+const esc = t => String(t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hoyISO = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const fechaCorta = iso => { const [a,m,d] = iso.split("-"); return d+"/"+m; };
+const nBs = n => Number(n||0).toLocaleString("es-BO");
+const maxId = () => P().reduce((a,p) => Math.max(a,p.id), 0) + 1;
+
+const vistas = {
+  hoy:["Hoy","Lunes 23 de noviembre · 5 sesiones"],
+  pacientes:["Pacientes",""],
+  agenda:["Agenda","Semana del 23 al 28 de noviembre"],
+  pagos:["Pagos","Noviembre 2026 · cierre el 30"],
+  ajustes:["Ajustes","Consultorio, tarifas y respaldo"]
+};
+
+/* ═══════════ navegación ═══════════ */
+function subPacientes(){
+  const a = estado.archivados.length;
+  return `${P().length} activos` + (a ? ` · ${a} ${a === 1 ? "archivado" : "archivados"}` : "");
+}
+function ir(v){
+  $$(".tabbar button").forEach(x => x.classList.toggle("on", x.dataset.view === v));
+  $$(".view").forEach(s => s.classList.remove("on"));
+  const sec = $("#v-" + v);
+  if(!sec) return;
+  sec.classList.add("on");
+  $("#ttl").textContent = vistas[v][0];
+  $("#sub").textContent = v === "pacientes" ? subPacientes() : vistas[v][1];
+  window.scrollTo({top:0});
+}
+$$(".tabbar button").forEach(b => b.addEventListener("click", () => {
+  ir(b.dataset.view);
+  history.replaceState(null, "", "#" + b.dataset.view);
+}));
+
+/* ═══════════ hoy ═══════════ */
+function pintarHoy(){
+  $("#hoyList").innerHTML = hoy.map((s,i) => `
+    <div class="ses">
+      <div class="t">${s.h}<small>${s.d}</small></div>
+      <div>
+        <div class="who">${esc(s.n)}</div>
+        <div class="meta">${esc(s.meta)}</div>
+        <div class="chips">
+          <span class="chip ${s.estado === 'ok' ? 'ok' : 'warn'}">${s.estado === 'ok' ? 'Confirmada' : 'Sin confirmar'}</span>
+          ${s.cobrado ? '<span class="chip ok">Pagada</span>' : `<span class="chip bad">Debe Bs ${s.monto}</span>`}
+          ${s.nota ? '<span class="chip neutral">Nota guardada</span>' : '<span class="chip neutral" style="border-style:dashed">Nota pendiente</span>'}
+        </div>
+        <div class="acts">
+          ${s.cobrado ? '' : `<button class="btn grow" data-cobrar="${i}">Cobrar Bs ${s.monto}</button>`}
+          ${s.estado === 'warn' ? `<button class="btn grow" data-recordar="${i}"><svg class="i sm"><use href="#i-chat"/></svg>Recordar</button>` : ''}
+          <button class="btn" data-nota="${i}"><svg class="i sm"><use href="#i-doc"/></svg>Nota</button>
+        </div>
+      </div>
+    </div>`).join("");
+
+  const deudaHoy = hoy.filter(s => !s.cobrado).reduce((a,s) => a + s.monto, 0);
+  const deudaTotal = P().reduce((a,p) => a + (p.saldo||0), 0);
+  $("#hoyCount").textContent = `${hoy.length} sesiones${hoy.filter(s=>!s.cobrado).length ? ' · ' + hoy.filter(s=>!s.cobrado).length + ' por cobrar' : ''}`;
+  $("#hoyDeuda").textContent = `${hoy.filter(s=>!s.cobrado).length} sesiones de hoy · Bs ${nBs(deudaHoy)}`;
+  const m = $$("#v-hoy .metric");
+  m[2].querySelector(".v").innerHTML = `<span class="cur">Bs</span> ${nBs(deudaTotal)}`;
+  m[1].querySelector(".v").innerHTML = `${hoy.filter(s=>s.estado==='ok').length} <small>/ ${hoy.length}</small>`;
+}
+
+/* ═══════════ pacientes ═══════════ */
+let modoArch = false;
+
+function pintarPacientes(filtro = ""){
+  const f = filtro.trim().toLowerCase();
+  $("#pTitle").textContent = modoArch ? "Pacientes archivados" : "Pacientes activos";
+  $("#btnNuevo").style.display = modoArch ? "none" : "";
+  $("#btnArchivados").textContent = modoArch ? "Ver activos" : "Ver archivados";
+
+  if(modoArch){
+    const lista = estado.archivados.filter(p => !f || p.n.toLowerCase().includes(f));
+    $("#plist").innerHTML = lista.length ? lista.map(p => `
+      <div class="prow">
+        <div class="ava">${iniciales(p.n)}</div>
+        <div>
+          <div class="pname">${esc(p.n)}</div>
+          <div class="pmeta">${p.s} sesiones · ${esc(p.m)}</div>
+        </div>
+        <button class="btn sm" data-restaurar="${p.id}">Restaurar</button>
+      </div>`).join("")
+      : '<div class="empty">No hay pacientes archivados.</div>';
+    $("#pcount").textContent = lista.length + (lista.length === 1 ? " archivado" : " archivados");
+    return;
+  }
+
+  const lista = P().filter(p => !f || p.n.toLowerCase().includes(f) || p.m.toLowerCase().includes(f));
+  $("#plist").innerHTML = lista.length ? lista.map(p => `
+    <button class="prow" data-id="${p.id}">
+      <div class="ava">${iniciales(p.n)}</div>
+      <div>
+        <div class="pname">${esc(p.n)}</div>
+        <div class="pmeta">${p.e} años · ${esc(p.m)}</div>
+      </div>
+      <div class="pbal ${p.saldo ? 'owed' : ''}">
+        ${p.saldo ? 'Bs ' + nBs(p.saldo) + '<small>pendiente</small>' : 'al día'}
+      </div>
+    </button>`).join("")
+    : '<div class="empty">Ningún paciente coincide con esa búsqueda.</div>';
+  $("#pcount").textContent = lista.length + (lista.length === 1 ? " registro" : " registros");
+}
+$("#q").addEventListener("input", e => pintarPacientes(e.target.value));
+
+function pintarPagos(){
+  $("#payList").innerHTML = pagos().slice(0,8).map(p => `
+    <div class="pay">
+      <div><div class="n">${esc(p.n)}</div><div class="m">${p.f} · ${esc(p.met)}</div></div>
+      <div><div class="amt">${nBs(p.monto)}</div><div class="rc">${p.rc}</div></div>
+    </div>`).join("") || '<div class="empty">Sin pagos registrados todavía.</div>';
+  $("#payCount").textContent = pagos().length + " registros";
+  const extra = Math.max(0, pagos().length - SEED_PAGOS.length);
+  const sumaExtra = pagos().slice(0, extra).reduce((a,p) => a + Number(p.monto||0), 0);
+  $("#mCobrado").innerHTML = `<span class="cur">Bs</span> ${nBs(6840 + sumaExtra)}`;
+  $("#mCobradoH").textContent = (46 + extra) + " sesiones";
+  const deuda = P().reduce((a,p) => a + (p.saldo||0), 0);
+  $("#mDeuda").innerHTML = `<span class="cur" style="color:var(--ink-3)">Bs</span> ${nBs(deuda)}`;
+  $("#mDeudaH").textContent = P().filter(p => p.saldo).length + " pacientes con saldo";
+}
+
+/* ═══════════ agenda ═══════════ */
+const semana = [["Lun","23",1],["Mar","24",1],["Mié","25",1],["Jue","26",1],["Vie","27",1],["Sáb","28",0]];
+$("#weekstrip").innerHTML = semana.map(([d,n,dot],i) => `
+  <button class="day ${i===0?'on':''}">
+    <span class="dw">${d}</span><span class="dn">${n}</span>
+    <span class="dt" style="${dot?'':'background:transparent'}"></span>
+  </button>`).join("");
+$$("#weekstrip .day").forEach(b => b.addEventListener("click", () => {
+  $$("#weekstrip .day").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  toast("En la app real cambia el día de la agenda.");
+}));
+
+$("#timeline").innerHTML = dia.map(b => `
+  <div class="trow">
+    <div class="hh">${b.h}</div>
+    <div class="slot">
+      <div class="blk ${b.s === 'warn' ? 'warn' : b.s === 'admin' ? 'admin' : ''}">
+        <b>${esc(b.n)}</b><span>${esc(b.t)} · ${b.dur} min</span>
+      </div>
+    </div>
+  </div>`).join("") + `
+  <div class="trow">
+    <div class="hh">18:00</div>
+    <div class="slot"><button class="free" id="addFree">Libre · toca para agendar</button></div>
+  </div>`;
+
+/* ═══════════ hoja ═══════════ */
+let sheetOpen = false;
+
+function abrirSheet(titulo, sub){
+  $("#dName").textContent = titulo;
+  $("#dSub").textContent = sub || "";
+  $("#sheet").classList.add("on");
+  $("#sheet").setAttribute("aria-hidden","false");
+  $("#scrim").classList.add("on");
+  $("#dBody").scrollTop = 0;
+  if(!sheetOpen){
+    sheetOpen = true;
+    try{ history.pushState({sheet:1}, ""); }catch(e){}
+  }
+}
+function ocultarSheet(){
+  $("#sheet").classList.remove("on");
+  $("#sheet").setAttribute("aria-hidden","true");
+  $("#scrim").classList.remove("on");
+  $("#dFoot").innerHTML = "";
+  sheetOpen = false;
+}
+function cerrarSheet(){
+  const estaba = sheetOpen;
+  ocultarSheet();
+  if(estaba && history.state && history.state.sheet){
+    try{ history.back(); }catch(e){}
+  }
+}
+/* el botón atrás de Android cierra la hoja, no la app */
+window.addEventListener("popstate", () => {
+  if(sheetOpen){ ocultarSheet(); return; }
+  const v = $$(".view.on")[0];
+  if(v){ try{ history.replaceState(null, "", "#" + v.id.replace("v-","")); }catch(e){} }
+});
+$("#dClose").addEventListener("click", cerrarSheet);
+$("#scrim").addEventListener("click", cerrarSheet);
+document.addEventListener("keydown", e => { if(e.key === "Escape" && sheetOpen) cerrarSheet(); });
+
+/* ficha */
+function abrirFicha(id){
+  const p = P().find(x => x.id === id);
+  if(!p) return;
+  abrirSheet(p.n, `${p.e} años · ${p.oc}`);
+  $("#dBody").innerHTML = `
+    <dl class="dl">
+      <dt>Motivo</dt><dd>${esc(p.m)}</dd>
+      <dt>Modalidad</dt><dd>${esc(p.mod)}</dd>
+      <dt>Sesiones</dt><dd>${p.s} · desde ${esc(p.desde)}</dd>
+      <dt>Teléfono</dt><dd>${esc(p.tel)}</dd>
+      <dt>Emergencia</dt><dd>${esc(p.emerg || "—")}</dd>
+      <dt>Consentimiento</dt><dd>${p.cons ? '<span class="chip ok">Firmado</span>' : '<span class="chip bad">Falta</span>'}</dd>
+      <dt>Saldo</dt><dd>${p.saldo ? `<span style="color:var(--bad);font-weight:600">Bs ${nBs(p.saldo)}</span>` : 'Al día'}</dd>
+    </dl>
+    <div style="margin:20px 0 14px;border-top:1px solid var(--rule)"></div>
+    <h3 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px;font-weight:600">Notas recientes</h3>
+    ${p.notas.length ? p.notas.map(([d,t,extra]) => `
+      <div class="mini-note"><div class="d">${esc(d)}</div><p>${esc(t)}</p>
+      ${extra ? `<p style="color:var(--ink-3);font-size:12.5px">${esc(extra)}</p>` : ''}</div>`).join("")
+      : '<div class="empty">Sin notas todavía.</div>'}
+  `;
+  $("#dFoot").innerHTML = `
+    <button class="btn primary grow" data-sesion="${p.id}"><svg class="i sm"><use href="#i-plus"/></svg>Registrar sesión</button>
+    <button class="btn" data-editar="${p.id}" aria-label="Editar"><svg class="i sm"><use href="#i-edit"/></svg></button>
+    <button class="btn" data-archivar="${p.id}" aria-label="Archivar"><svg class="i sm"><use href="#i-archive"/></svg></button>
+  `;
+}
+
+/* formulario de paciente */
+function abrirForm(p){
+  const nuevo = !p;
+  const d = p || {n:"",e:"",oc:"",m:"",mod:"Individual",tel:"",emerg:"",cons:false,saldo:0,notas:[]};
+  abrirSheet(nuevo ? "Nuevo paciente" : "Editar paciente", nuevo ? "Los campos con asterisco son obligatorios" : `Ficha de ${d.n}`);
+  $("#dBody").innerHTML = `
+    <div class="field" id="f-n"><label>Nombre completo <b>*</b></label><input id="i-n" value="${esc(d.n)}" autocomplete="off" placeholder="Nombre y apellidos"><span class="errmsg">Escribe el nombre.</span></div>
+    <div class="grid2">
+      <div class="field" id="f-tel"><label>Teléfono <b>*</b></label><input id="i-tel" type="tel" inputmode="tel" value="${esc(d.tel)}" placeholder="7XX XX XXX"><span class="errmsg">El teléfono hace falta para recordarle.</span></div>
+      <div class="field"><label>Edad</label><input id="i-e" type="number" inputmode="numeric" min="4" max="99" value="${d.e || ""}" placeholder="34"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Ocupación</label><input id="i-oc" value="${esc(d.oc)}" placeholder="A qué se dedica"></div>
+      <div class="field"><label>Contacto de emergencia</label><input id="i-emerg" value="${esc(d.emerg)}" placeholder="Nombre · teléfono"></div>
+    </div>
+    <div class="field" id="f-m"><label>Motivo de consulta <b>*</b></label><input id="i-m" value="${esc(d.m)}" placeholder="Ansiedad, duelo, pareja…"><span class="errmsg">Escribe el motivo.</span></div>
+
+    <div class="field">
+      <label>Modalidad</label>
+      <div class="seg" id="segMod">
+        ${["Individual","Pareja","Adolescente","Familia"].map(x => `<button type="button" data-mod="${x}" class="${d.mod===x?'on':''}">${x}</button>`).join("")}
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Tarifa (Bs)</label>
+      <input id="i-tarifa" type="number" inputmode="numeric" value="${tarifaDe(d.mod)}">
+      <span class="hint" id="tarifaHint">Sale de Ajustes según la modalidad. Se puede cambiar para este paciente.</span>
+    </div>
+
+    <div class="check" style="margin:6px 0 16px">
+      <input type="checkbox" id="i-cons" ${d.cons ? "checked" : ""}>
+      <span>Consentimiento informado firmado</span>
+    </div>
+
+    ${nuevo ? `
+    <div class="field"><label>Notas iniciales</label><textarea id="i-notas" placeholder="Lo que quiera dejar escrito antes de la primera sesión."></textarea></div>` : ""}
+  `;
+
+  $("#dFoot").innerHTML = `
+    <button class="btn grow" data-cancelar>Cancelar</button>
+    <button class="btn primary grow" data-guardar="${nuevo ? 0 : p.id}">${nuevo ? "Crear paciente" : "Guardar cambios"}</button>
+  `;
+
+  $$("#segMod button").forEach(b => b.addEventListener("click", () => {
+    $$("#segMod button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    $("#i-tarifa").value = tarifaDe(b.dataset.mod);
+  }));
+
+  setTimeout(() => { const el = $("#i-n"); if(el) el.focus({preventScroll:true}); }, 300);
+}
+
+function tarifaDe(mod){
+  const t = cfg().tarifas || cfgDefault.tarifas;
+  if(mod === "Primera") return t.Primera;
+  return t[mod] != null ? t[mod] : t.Individual;
+}
+
+function guardarPaciente(id){
+  const n = $("#i-n").value.trim();
+  const tel = $("#i-tel").value.trim();
+  const m = $("#i-m").value.trim();
+  let mal = false;
+  [["f-n", n], ["f-tel", tel], ["f-m", m]].forEach(([f, v]) => {
+    const campo = $("#" + f);
+    campo.classList.toggle("err", !v);
+    if(!v) mal = true;
+  });
+  if(mal){ toast("Faltan datos obligatorios."); return; }
+
+  const datos = {
+    n, tel, m,
+    e: Number($("#i-e").value) || "",
+    oc: $("#i-oc").value.trim(),
+    emerg: $("#i-emerg").value.trim(),
+    mod: $("#segMod .on").dataset.mod,
+    tarifa: Number($("#i-tarifa").value) || 0,
+    cons: $("#i-cons").checked
+  };
+
+  if(id){
+    const p = P().find(x => x.id === id);
+    Object.assign(p, datos);
+    toast("Ficha actualizada.");
+  }else{
+    const nueva = Object.assign({
+      id:maxId(), s:0, u:"—", saldo:0, desde:"Noviembre 2026",
+      notas:[["—", "Paciente creado el 23/11." + ($("#i-notas").value.trim() ? " " + $("#i-notas").value.trim() : "")]]
+    }, datos);
+    P().unshift(nueva);
+    toast("Paciente creado. Ya se puede agendar.");
+  }
+  guardar();
+  pintarPacientes($("#q").value);
+  pintarPagos();
+  pintarHoy();
+  ir("pacientes");
+  cerrarSheet();
+  $("#sub").textContent = subPacientes();
+}
+
+/* formulario de sesión */
+function abrirSesion(id){
+  const p = P().find(x => x.id === id) || P()[0];
+  if(!p){ toast("Primero crea un paciente."); return; }
+  abrirSheet("Registrar sesión", p.n);
+  $("#dBody").innerHTML = `
+    <div class="field"><label>Paciente</label>
+      <select id="s-pac">${P().map(x => `<option value="${x.id}" ${x.id===p.id?"selected":""}>${esc(x.n)}</option>`).join("")}</select>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Fecha</label><input id="s-fecha" type="date" value="${hoyISO()}"></div>
+      <div class="field"><label>Hora</label><input id="s-hora" type="time" value="10:00"></div>
+    </div>
+    <div class="field"><label>Duración</label>
+      <div class="seg" id="segDur">
+        <button type="button" data-dur="45">45 min</button>
+        <button type="button" data-dur="60" class="on">60 min</button>
+        <button type="button" data-dur="90">90 min</button>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Monto (Bs)</label><input id="s-monto" type="number" inputmode="numeric" value="${p.tarifa || tarifaDe(p.mod)}"></div>
+      <div class="field"><label>Cobro</label>
+        <select id="s-estado"><option value="pagado">Pagado ahora</option><option value="pendiente">Queda debiendo</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Método</label>
+      <select id="s-met"><option>Efectivo</option><option>QR Simple</option><option>Transferencia</option><option>Sin cobrar</option></select>
+    </div>
+    <div class="field"><label>Nota de la sesión</label>
+      <textarea id="s-nota" placeholder="Qué trabajaron, qué queda pendiente…"></textarea>
+    </div>
+  `;
+  $("#dFoot").innerHTML = `
+    <button class="btn grow" data-cancelar>Cancelar</button>
+    <button class="btn primary grow" data-guardarsesion="${p.id}">Registrar</button>
+  `;
+  $$("#segDur button").forEach(b => b.addEventListener("click", () => {
+    $$("#segDur button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+  }));
+  $("#s-pac").addEventListener("change", e => {
+    const q = P().find(x => x.id === +e.target.value);
+    if(q) $("#s-monto").value = q.tarifa || tarifaDe(q.mod);
+  });
+}
+
+function guardarSesion(id){
+  const p = P().find(x => x.id === +$("#s-pac").value) || P().find(x => x.id === id);
+  if(!p) return;
+  const monto = Number($("#s-monto").value) || 0;
+  const pagado = $("#s-estado").value === "pagado";
+  const met = $("#s-met").value;
+  const nota = $("#s-nota").value.trim();
+  const fecha = fechaCorta($("#s-fecha").value);
+
+  p.s += 1;
+  p.u = fecha;
+  p.saldo = Math.max(0, (p.saldo || 0) - monto);
+  if(!pagado) p.saldo += monto;
+  if(nota){
+    p.notas.unshift([fecha, nota + (pagado ? "" : " · cobro pendiente")]);
+  }
+
+  if(pagado && monto > 0){
+    const num = 189 + pagos().length;
+    pagos().unshift({f:fecha, n:p.n, met, monto, rc:"R-0" + num});
+  }
+
+  guardar();
+  pintarPacientes($("#q").value);
+  pintarPagos();
+  pintarHoy();
+  cerrarSheet();
+  toast(pagado ? `Sesión registrada y cobrada: Bs ${nBs(monto)}.` : `Sesión registrada. Quedan Bs ${nBs(p.saldo)} pendientes.`);
+}
+
+/* archivar */
+function archivar(id){
+  const p = P().find(x => x.id === id);
+  if(!p) return;
+  const pie = $("#dFoot");
+  pie.innerHTML = `
+    <button class="btn grow" data-cancelar>Mejor no</button>
+    <button class="btn danger grow" data-confarchivar="${id}">Sí, archivar</button>
+  `;
+  toast("Archivar no borra la historia: sale de la lista y se puede recuperar.");
+}
+
+/* ═══════════ acciones ═══════════ */
+let timer;
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(timer);
+  timer = setTimeout(() => t.classList.remove("on"), 2800);
+}
+
+document.addEventListener("click", e => {
+  const t = e.target;
+
+  const cobrar = t.closest("[data-cobrar]");
+  if(cobrar){
+    const s = hoy[+cobrar.dataset.cobrar];
+    s.cobrado = true; s.nota = true;
+    const p = P().find(x => x.id === s.pid);
+    if(p){
+      p.s += 1; p.u = "23/11";
+      p.saldo = Math.max(0, (p.saldo || 0) - s.monto);
+      pagos().unshift({f:"23/11", n:p.n, met:"Efectivo", monto:s.monto, rc:"R-0190"});
+    }
+    guardar(); pintarHoy(); pintarPagos(); pintarPacientes($("#q").value);
+    toast(`Cobrado. Recibo guardado en PDF por Bs ${nBs(s.monto)}.`);
+    return;
+  }
+  if(t.closest("[data-recordar]")){ toast("Abre WhatsApp con el mensaje escrito. Ella solo toca Enviar."); return; }
+  if(t.closest("[data-nota]")){ toast("Abre la nota de la sesión, con la anterior a la vista."); return; }
+
+  const fila = t.closest(".prow[data-id]");
+  if(fila){ abrirFicha(+fila.dataset.id); return; }
+
+  if(t.closest("[data-sesion]")){ abrirSesion(+t.closest("[data-sesion]").dataset.sesion); return; }
+  if(t.closest("[data-editar]")){
+    const p = P().find(x => x.id === +t.closest("[data-editar]").dataset.editar);
+    abrirForm(p); return;
+  }
+  if(t.closest("[data-archivar]")){ archivar(+t.closest("[data-archivar]").dataset.archivar); return; }
+  if(t.closest("[data-confarchivar]")){
+    const id = +t.closest("[data-confarchivar]").dataset.confarchivar;
+    const i = P().findIndex(x => x.id === id);
+    estado.archivados.unshift(P()[i]);
+    P().splice(i,1);
+    guardar(); pintarPacientes($("#q").value); pintarHoy(); cerrarSheet();
+    $("#sub").textContent = subPacientes();
+    toast("Paciente archivado. Está en «Ver archivados».");
+    return;
+  }
+  if(t.closest("[data-cancelar]")){ cerrarSheet(); return; }
+  if(t.closest("[data-cerrar]")){ cerrarSheet(); return; }
+  if(t.closest("[data-aplicarimport]")){ aplicarImport(); return; }
+  if(t.closest("[data-guardar]")){ guardarPaciente(+t.closest("[data-guardar]").dataset.guardar); return; }
+  if(t.closest("[data-guardarsesion]")){ guardarSesion(+t.closest("[data-guardarsesion]").dataset.guardarsesion); return; }
+
+  if(t.closest("#btnNuevo")){ abrirForm(null); return; }
+  if(t.closest("#addFree")){ abrirSesion(P()[0] ? P()[0].id : 0); return; }
+  if(t.closest("#btnArchivados")){ modoArch = !modoArch; pintarPacientes($("#q").value); return; }
+  const rest = t.closest("[data-restaurar]");
+  if(rest){
+    const id = +rest.dataset.restaurar;
+    const i = estado.archivados.findIndex(x => x.id === id);
+    if(i > -1){
+      const p = estado.archivados.splice(i,1)[0];
+      P().unshift(p);
+      guardar(); pintarPacientes($("#q").value);
+      $("#sub").textContent = subPacientes();
+      toast(p.n + " volvió a la lista de activos.");
+    }
+    return;
+  }
+});
+
+$("#saveNote").addEventListener("click", () => {
+  const ta = $("#quickNote");
+  if(!ta.value.trim()){ toast("La nota está vacía."); return; }
+  ta.value = ""; toast("Nota guardada en la tableta.");
+});
+$("#btnBackup").addEventListener("click", exportar);
+$$(".task input").forEach(c => c.addEventListener("change", () => {
+  c.closest(".task").querySelector("label").classList.toggle("done", c.checked);
+}));
+
+/* ajustes */
+$("#btnPin").addEventListener("click", () => toast("PIN de 4 dígitos. Se pide cada vez que se abre la app."));
+$("#btnReset").addEventListener("click", () => {
+  seed(); guardar(); pintarPacientes(); pintarPagos(); pintarHoy();
+  sincronizarAjustes(); pintarRespaldo(); toast("Datos de ejemplo restaurados.");
+});
+$("#btnWipe").addEventListener("click", () => {
+  estado.pacientes = []; estado.pagos = []; estado.archivados = []; estado.borrado = true;
+  guardar(); pintarPacientes(); pintarPagos(); pintarHoy(); pintarRespaldo();
+  toast("Todo borrado. La app quedó vacía.");
+});
+function sincronizarAjustes(){
+  $("#cNombre").value = cfg().nombre;
+  $("#cEsp").value = cfg().esp;
+  $("#cCiudad").value = cfg().ciudad;
+  $("#tInd").value = cfg().tarifas.Individual;
+  $("#tPar").value = cfg().tarifas.Pareja;
+  $("#tPri").value = cfg().tarifas.Primera;
+}
+[["#cNombre","nombre"],["#cEsp","esp"],["#cCiudad","ciudad"]].forEach(([sel,key]) => {
+  $(sel).addEventListener("change", e => { cfg()[key] = e.target.value; guardar(); });
+});
+[["#tInd","Individual"],["#tPar","Pareja"],["#tPri","Primera"]].forEach(([sel,key]) => {
+  $(sel).addEventListener("change", e => { cfg().tarifas[key] = Number(e.target.value) || 0; guardar(); });
+});
+
+/* ═══════════ tema ═══════════ */
+function aplicarTema(t, persistir = true){
+  document.documentElement.dataset.theme = t === "dark" ? "dark" : "";
+  if(persistir){ try{ localStorage.setItem("consultorio-psi-theme", t); }catch(e){} }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", t === "dark" ? "#161a1b" : "#fbf8f3");
+  const icono = $("#btnTema use");
+  if(icono) icono.setAttribute("href", t === "dark" ? "#i-sun2" : "#i-moon");
+  const b = $("#btnTema");
+  if(b){
+    b.setAttribute("aria-label", t === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+    b.title = t === "dark" ? "Modo claro" : "Modo oscuro";
+  }
+}
+$("#btnTema").addEventListener("click", () => {
+  const ahora = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  aplicarTema(ahora);
+  toast(ahora === "dark" ? "Modo oscuro. Se acuerda para la próxima." : "Modo claro.");
+});
+
+/* ═══════════ ayuda ═══════════ */
+const AYUDA = {
+  hoy:{
+    t:"Hoy", s:"La pantalla que abres al llegar.",
+    bloques:[
+      {h:"Para qué sirve", p:"Muestra solo las sesiones de hoy, en orden de hora. Si no es hoy, no aparece aquí."},
+      {h:"Qué dicen los números", ul:[
+        "Sesiones de hoy: cuántas tienes y a qué hora empieza la primera.",
+        "Confirmadas: cuántas pacientes ya dijeron que sí vienen.",
+        "Por cobrar: la plata que te deben, sumando lo de hoy y lo viejo."
+      ]},
+      {h:"Qué hace cada botón", ul:[
+        "Cobrar Bs: registra el pago de esa sesión y deja el recibo hecho. El número es lo que cobras por esa modalidad.",
+        "Recordar: abre WhatsApp con el mensaje ya escrito. Tú solo tocas Enviar.",
+        "Nota: abre la nota de la sesión, con la anterior a la vista.",
+        "La franja amarilla: lo que te queda pendiente del día. Se abre y se cierra."
+      ]}
+    ]
+  },
+  pacientes:{
+    t:"Pacientes", s:"Tu lista completa, con la ficha de cada uno.",
+    bloques:[
+      {h:"Para qué sirve", p:"Aquí están todos los que atiendes ahora. El buscador filtra por nombre o por motivo."},
+      {h:"Nuevo paciente", p:"Abre el formulario. Solo tres cosas son obligatorias: nombre, teléfono y motivo, porque sin teléfono no puedes recordarle la sesión y sin motivo no sabes por qué viene. La tarifa se llena sola según la modalidad."},
+      {h:"Al tocar un nombre", ul:[
+        "Ves su ficha: motivo, sesiones, teléfono, contacto de emergencia, consentimiento y saldo.",
+        "Registrar sesión: anota la sesión de hoy y el cobro en un solo paso.",
+        "El lápiz: corrige cualquier dato.",
+        "La caja: archiva. Ojo, archivar no borra: la historia se queda y se puede recuperar en «Ver archivados»."
+      ]}
+    ]
+  },
+  agenda:{
+    t:"Agenda", s:"Tu semana, un día a la vez.",
+    bloques:[
+      {h:"Para qué sirve", p:"En una tableta, una semana entera no se lee: se adivina. Por eso aquí ves un día completo y cambias de día en la tira de arriba."},
+      {h:"Qué significan los colores", ul:[
+        "Verde azulado: la sesión está confirmada.",
+        "Amarillo: todavía no confirmó.",
+        "Rayado: algo tuyo, no una sesión. Almuerzo, supervisión, papeleo."
+      ]},
+      {h:"El hueco libre", p:"Toca «Libre» para agendar ahí. En la app de verdad se abre el formulario con esa hora ya puesta."}
+    ]
+  },
+  pagos:{
+    t:"Pagos", s:"La plata: lo que entró y lo que falta.",
+    bloques:[
+      {h:"Para qué sirve", p:"Ver el mes de un vistazo. Arriba lo cobrado y lo que te deben, abajo el detalle de los últimos recibos."},
+      {h:"El gráfico", p:"Son los últimos seis meses, en miles de bolivianos. Sirve para saber si el mes va mejor o peor que los anteriores."},
+      {h:"Los recibos", p:"Cada línea es un pago. En la app de verdad el recibo sale en PDF con tus datos para imprimirlo o mandarlo por WhatsApp."},
+      {h:"Una aclaración", p:"Esto no es factura. La factura del SIN la manejas con tu contador; aquí solo llevas tu cuenta interna."}
+    ]
+  },
+  ajustes:{
+    t:"Ajustes", s:"Lo que se configura una vez y casi no se toca.",
+    bloques:[
+      {h:"Tus datos y tarifas", p:"El nombre que sale en los recibos y cuánto cobras según la modalidad. Cambiar una tarifa no toca nada de lo que ya cobraste."},
+      {h:"Exportar e importar", p:"Son los dos botones importantes. Exportar baja un archivo con todos tus pacientes, notas y pagos. Importar lo devuelve tal como estaba. Si algún día la app aparece vacía, ese archivo es la solución."},
+      {h:"Por qué hay que respaldar", p:"Los datos viven en esta tableta, no en internet. Eso es lo que protege la historia clínica, pero también significa que si se limpia el navegador o se rompe la tableta, se van. El archivo es la copia de seguridad."},
+      {h:"Borrar todo", p:"Deja la app en blanco. No se puede deshacer, así que exporta primero."}
+    ]
+  }
+};
+
+function abrirAyuda(v){
+  const a = AYUDA[v] || AYUDA.hoy;
+  abrirSheet(a.t, a.s);
+  $("#dBody").innerHTML = a.bloques.map(b => `
+    <div class="help-sec">
+      <h3>${b.h}</h3>
+      ${b.p ? `<p>${b.p}</p>` : ""}
+      ${b.ul ? `<ul>${b.ul.map(x => `<li>${x}</li>`).join("")}</ul>` : ""}
+    </div>`).join("") + `
+    <div class="help-note">Este texto es de la maqueta. En la app de verdad, el botón ? estará en el mismo lugar de cada pantalla.</div>`;
+  $("#dFoot").innerHTML = `<button class="btn primary grow" data-cerrar>Entendido</button>`;
+}
+
+function abrirGuia(){
+  abrirSheet("Guía rápida", "Todo lo que hace la app, en una página");
+  $("#dBody").innerHTML = `
+    <div class="help-sec">
+      <p>La app tiene cinco pantallas. Abajo, en la barra, están siempre a mano.</p>
+      <ul>
+        <li><b>Hoy:</b> las sesiones de hoy y lo que hay que cobrar.</li>
+        <li><b>Pacientes:</b> la lista y la ficha de cada uno. Aquí se crea un paciente nuevo.</li>
+        <li><b>Agenda:</b> tu semana, un día a la vez.</li>
+        <li><b>Pagos:</b> lo que entró en el mes y lo que te deben.</li>
+        <li><b>Ajustes:</b> tarifas, respaldo y esta guía.</li>
+      </ul>
+    </div>
+    <div class="help-sec">
+      <h3>El día normal</h3>
+      <p>Abre en <b>Hoy</b>. Toca la sesión que sigue, escribe la nota, cobra. Si alguien no confirmó, «Recordar» te abre WhatsApp con el mensaje listo.</p>
+    </div>
+    <div class="help-sec">
+      <h3>Una vez por semana</h3>
+      <p>Entra a <b>Ajustes</b> y toca <b>Exportar</b>. Guarda ese archivo en tu Drive o mándatelo por WhatsApp a ti misma. Es tu copia de seguridad: si la tableta se rompe, con ese archivo lo recuperas todo.</p>
+    </div>
+    <div style="font-size:11.5px;color:var(--ink-3);line-height:1.6">
+      Lo que esta app no hace: no manda recordatorios sola, no saca factura del SIN y no guarda nada en internet. A propósito.
+    </div>`;
+  $("#dFoot").innerHTML = `<button class="btn primary grow" data-cerrar>Gracias</button>`;
+}
+
+$("#btnAyuda").addEventListener("click", () => {
+  const actual = $$(".view.on")[0];
+  abrirAyuda(actual ? actual.id.replace("v-","") : "hoy");
+});
+$("#btnGuia").addEventListener("click", abrirGuia);
+
+/* ═══════════ respaldo ═══════════ */
+function fechaLegible(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return "";
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mi = String(d.getMinutes()).padStart(2,"0");
+  return `${dd}/${mm}/${d.getFullYear()} a las ${hh}:${mi}`;
+}
+
+function pintarRespaldo(){
+  let iso = null;
+  try{ iso = localStorage.getItem("consultorio-psi-lastbackup"); }catch(e){}
+  const el = $("#lastBackup");
+  if(el) el.textContent = iso ? "Hecho el " + fechaLegible(iso) + "." : "Todavía no hiciste ninguno.";
+}
+
+function exportar(){
+  const data = {
+    app:"consultorio", version:1, exportado:new Date().toISOString(),
+    pacientes:P(), pagos:pagos(), archivados:estado.archivados, cfg:cfg()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "respaldo-consultorio-" + hoyISO() + ".json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  try{ localStorage.setItem("consultorio-psi-lastbackup", new Date().toISOString()); }catch(e){}
+  pintarRespaldo();
+  toast("Respaldo descargado. Guárdalo en Drive o mándatelo por WhatsApp.");
+}
+
+let importPend = null;
+function abrirConfirmImport(d, nombreArchivo){
+  importPend = d;
+  const np = (d.pacientes || []).length;
+  const npa = (d.pagos || []).length;
+  abrirSheet("Importar respaldo", nombreArchivo);
+  $("#dBody").innerHTML = `
+    <div class="help-sec">
+      <p>El archivo tiene <b>${np} ${np === 1 ? "paciente" : "pacientes"}</b> y <b>${npa} ${npa === 1 ? "pago" : "pagos"}</b>${d.exportado ? ", exportado el " + fechaLegible(d.exportado) : ""}.</p>
+      <p>Si continúas, esto <b>reemplaza</b> los ${P().length} pacientes y ${pagos().length} pagos que hay ahora en la tableta.</p>
+    </div>
+    <div class="help-note">Si no estás segura, cancela y primero exporta lo que tienes hoy. Así no pierdes nada.</div>
+  `;
+  $("#dFoot").innerHTML = `
+    <button class="btn grow" data-cancelar>Cancelar</button>
+    <button class="btn primary grow" data-aplicarimport>Reemplazar</button>
+  `;
+}
+
+function aplicarImport(){
+  const d = importPend;
+  if(!d) return;
+  const base = {notas:[], saldo:0, s:0, e:"", oc:"", tel:"", emerg:"", mod:"Individual", cons:false, u:"—", desde:""};
+  estado.pacientes = (d.pacientes || []).map((p,i) => Object.assign({}, base, p, {id:p.id || i+1}));
+  estado.pagos = (d.pagos || []).map(p => ({
+    f:p.f || "—", n:p.n || "—", met:p.met || "Efectivo", monto:Number(p.monto)||0, rc:p.rc || "—"
+  }));
+  estado.archivados = d.archivados || [];
+  if(d.cfg) estado.cfg = Object.assign({}, cfgDefault, d.cfg, {tarifas:Object.assign({}, cfgDefault.tarifas, (d.cfg||{}).tarifas||{})});
+  estado.borrado = false;
+  guardar();
+  pintarPacientes($("#q").value);
+  pintarPagos();
+  pintarHoy();
+  sincronizarAjustes();
+  pintarRespaldo();
+  cerrarSheet();
+  ir("pacientes");
+  $("#sub").textContent = subPacientes();
+  toast(`Respaldo importado: ${estado.pacientes.length} pacientes.`);
+  importPend = null;
+}
+
+$("#btnExport").addEventListener("click", exportar);
+$("#btnImport").addEventListener("click", () => $("#fileImport").click());
+
+$("#fileImport").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const lector = new FileReader();
+  lector.onload = () => {
+    try{
+      const d = JSON.parse(lector.result);
+      if(!d || !Array.isArray(d.pacientes)) throw new Error("formato");
+      abrirConfirmImport(d, f.name);
+    }catch(err){
+      toast("Ese archivo no es un respaldo del consultorio.");
+    }
+    e.target.value = "";
+  };
+  lector.onerror = () => toast("No se pudo leer el archivo.");
+  lector.readAsText(f);
+});
+
+/* ═══════════ bienvenida ═══════════ */
+function pintarBienvenida(){
+  let visto = false;
+  try{ visto = localStorage.getItem("consultorio-psi-welcome") === "ok"; }catch(e){}
+  $("#welcome").style.display = visto ? "none" : "";
+}
+$("#welcomeOk").addEventListener("click", () => {
+  try{ localStorage.setItem("consultorio-psi-welcome", "ok"); }catch(e){}
+  pintarBienvenida();
+  toast("Listo. Toca el botón ? cuando no sepas qué hace algo.");
+});
+
+/* arranque */
+pintarHoy();
+pintarPacientes();
+pintarPagos();
+sincronizarAjustes();
+pintarBienvenida();
+pintarRespaldo();
+aplicarTema(document.documentElement.dataset.theme === "dark" ? "dark" : "light", false);
+const inicial = location.hash.replace("#","");
+if(vistas[inicial]) ir(inicial);
+if(inicial.startsWith("ficha-")){ ir("pacientes"); abrirFicha(+inicial.split("-")[1]); }
+if(inicial === "nuevo"){ ir("pacientes"); abrirForm(null); }
+</script>
+</body>
+</html>
